@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Animal Classifier</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      background: #f8f6ff;
+      padding: 40px;
+    }
+    .upload-box {
+      border: 2px dashed #9c6ade;
+      border-radius: 20px;
+      padding: 40px;
+      width: 400px;
+      margin: 20px auto;
+      background: #fff;
+      cursor: pointer;
+    }
+    button {
+      margin-top: 15px;
+      padding: 10px 20px;
+      border: none;
+      background: #9c6ade;
+      color: #fff;
+      font-size: 16px;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #7a4ed9;
+    }
+    #preview {
+      margin-top: 20px;
+      max-width: 300px;
+      border-radius: 12px;
+      box-shadow: 0px 2px 8px rgba(0,0,0,0.2);
+    }
+  </style>
+</head>
+<body>
+  <h1>🥔 Potato Disease Classification</h1>
+  
+  <form id="uploadForm">
+    <div class="upload-box" onclick="document.getElementById('fileInput').click()">
+      <p>Drag & drop image<br>or click to select</p>
+      <input type="file" id="fileInput" name="file" style="display:none;" accept="image/*">
+    </div>
+    <button type="submit">Upload & Predict</button>
+  </form>
+
+  <div id="result"></div>
+  <img id="preview" />
+
+  <script>
+    const fileInput = document.getElementById('fileInput');
+    const form = document.getElementById('uploadForm');
+    const resultDiv = document.getElementById('result');
+    const preview = document.getElementById('preview');
+
+    fileInput.addEventListener('change', () => {
+      const file = fileInput.files[0];
+      if (file) {
+        preview.src = URL.createObjectURL(file);
+      }
+    });
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const file = fileInput.files[0];
+      if (!file) {
+        alert("Please select an image!");
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append("file", file);
+
+      try {
+        const response = await fetch("http://127.0.0.1:8000/predict/", {
+          method: "POST",
+          body: formData
+        });
+        const data = await response.json();
+        resultDiv.innerHTML = `<h2>Prediction: ${data.prediction} (Confidence: ${data.confidence})</h2>`;
+      } catch (err) {
+        resultDiv.innerHTML = `<p style="color:red;">Error: ${err}</p>`;
+      }
+    });
+  </script>
+</body>
+</html>
